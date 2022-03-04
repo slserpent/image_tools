@@ -1,11 +1,11 @@
 <?php
 /*
- * Removes letterboxing from images with subdirectory traversal. False positives are possible with solid color backgrounds, so is best used on only images with known letterboxing. Can also account for artifacting from low-quality JPEG artifacts. However, only works for solid color backgrounds; cannot remove letterboxing where the background is a zoomed blurred copy of the image. Use ImageMagick >7.0.8 for better accuracy.
+ * Removes letterboxing from images with subdirectory traversal. False positives are possible with solid colors along image edges, e.g. dark interiors, backdrops, or clear sky, so is best used on only images with known letterboxing. Can account for artifacting from low-quality JPEG artifacts. However, only works for solid color backgrounds; cannot remove letterboxing where the background is a zoomed blurred copy of the image. Use ImageMagick >7.0.8 for better accuracy.
  */
 
 //the text to append to filenames when saving with rename output mode
 $rename_text = ".cropped";
-//the subdirectory name when saving with rename output mode
+//the subdirectory name when saving with copy output mode
 $copy_dir = "cropped";
 //percent of color variation that is still considered background. use higher values if not all letterboxing is removed.
 $threshold_fuzz = 0.01;
@@ -23,7 +23,7 @@ set_time_limit(0);
 //the script can run in either CLI or CGI
 $options = ScriptOutput::get_params();
 //init the output class
-$output = new ScriptOutput([['title' => "DeLetterbox ImageMagick Script", 'wrap' => 120]]);
+$output = new ScriptOutput([['title' => "DeLetterbox ImageMagick Script", 'wrap' => 80]]);
 
 if (!can_iterate($options)) {
 	$output->header("Options");
@@ -47,7 +47,7 @@ if (has_value($options['output'])) {
     if (!preg_match('/^(rename|copy|overwrite)$/i', $output_method)) die("Invalid output method.");
 } else $output_method = "rename";
 if (has_value($options['pattern'])) {
-	$pattern = $options['output'];
+	$pattern = $options['pattern'];
 } else $pattern = '/\.(png|jpg)$/i';
 if (has_value($options['tag'])) {
 	$tag = $options['tag'];

@@ -5,7 +5,7 @@
 
 //the text to append to filenames when saving with rename output mode
 $rename_text = ".mirrored";
-//the subdirectory name when saving with rename output mode
+//the subdirectory name when saving with copy output mode
 $copy_dir = "mirrored";
 //the minimum JPEG quality (0-100) when saving the cropped image, regardless of what the input quality was
 $min_jpg_quality = 75;
@@ -17,12 +17,12 @@ set_time_limit(0);
 //the script can run in either CLI or CGI
 $options = ScriptOutput::get_params();
 //init the output class
-$output = new ScriptOutput([['title' => "Mirror ImageMagick Script", 'wrap' => 120]]);
+$output = new ScriptOutput([['title' => "Mirror ImageMagick Script", 'wrap' => 80]]);
 
 if (!can_iterate($options)) {
 	$output->header("Options");
 	$output->line("path: path to image directory");
-	$output->line("output: how to output modified images, either 'rename', 'copy', or 'overwrite'. Rename places \$rename_text before image file extension in same directory. Copy puts image file in relative directory \$copy_dir with same filename. Default method is 'rename'.");
+	$output->line("output: how to output modified images, either 'rename', 'copy', or 'overwrite'. Rename places \$rename_text before image file extension in same directory. Copy puts image file in relative directory \$copy_dir with same filename. Default method is 'overwrite'.");
 	$output->line("pattern: regex pattern for files to match. Default is a pattern matching *.jpg and *.png files.");
 	$output->line("tag: optional EXIF keyword tag to filter on.");
 	$output->line("traverse: boolean indicating whether or not to traverse subdirectories. Default is traverse true.");
@@ -37,9 +37,9 @@ if (has_value($options['path'])) {
 if (has_value($options['output'])) {
     $output_method = $options['output'];
     if (!preg_match('/^(rename|copy|overwrite)$/i', $output_method)) die("Invalid output method.");
-} else $output_method = "rename";
+} else $output_method = "overwrite";
 if (has_value($options['pattern'])) {
-	$pattern = $options['output'];
+	$pattern = $options['pattern'];
 } else $pattern = '/\.(png|jpg)$/i';
 if (has_value($options['tag'])) {
 	$tag = $options['tag'];

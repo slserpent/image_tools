@@ -10,7 +10,7 @@ set_time_limit(0);
 //the script can run in either CLI or CGI
 $options = ScriptOutput::get_params();
 //init the output class
-$output = new ScriptOutput([['title' => "Convert-to-JPEG ImageMagick Script", 'wrap' => 120]]);
+$output = new ScriptOutput([['title' => "Convert-to-JPEG ImageMagick Script", 'wrap' => 80]]);
 
 if (!can_iterate($options)) {
 	$output->header("Options");
@@ -20,6 +20,7 @@ if (!can_iterate($options)) {
 	$output->line("traverse: boolean indicating whether or not to traverse subdirectories. Default is traverse true.");
 	$output->line("overwrite: boolean indicating whether or not to overwrite a file if it has the same name as the input file with .jpg extension. Default is false.");
 	$output->line("delete: boolean indicating whether or not to delete input files on successful conversion. Default is true.");
+	$output->line("quality: sets the JPEG quality level for converted images. Requires a number 0 through 100, default is 95.");
 	$output->end_section();
 	exit();
 }
@@ -30,7 +31,7 @@ if (has_value($options['path'])) {
 	if (!file_exists($path)) die("Invalid path.");
 } else die("No path specified.");
 if (has_value($options['pattern'])) {
-	$pattern = $options['output'];
+	$pattern = $options['pattern'];
 } else $pattern = '/\.png$/i';
 if (has_value($options['traverse'])) {
 	$traverse = (bool)$options['traverse'];
@@ -41,13 +42,17 @@ if (has_value($options['overwrite'])) {
 if (has_value($options['delete'])) {
 	$delete_on_success = (bool)$options['delete'];
 } else $delete_on_success = true;
+if (has_value($options['quality']) && is_numeric($options['quality'])) {
+	$jpg_quality = min(max($options['quality'], 0), 100);
+} else $jpg_quality = 95;
 
 $output->begin_section("Current Options");
-$output->line("Path: " . $path);
-$output->line("Pattern: " . $pattern);
+$output->line("Path: $path");
+$output->line("Pattern: $pattern");
 $output->line("Traverse Subdirectories: " . ScriptOutput::data_to_string($traverse));
 $output->line("Overwrite Existing Targets: " . ScriptOutput::data_to_string($overwrite));
 $output->line("Delete On Successful Conversion: " . ScriptOutput::data_to_string($delete_on_success));
+$output->line("JPEG Quality: $jpg_quality");
 $output->end_section();
 
 $output->begin_section();
@@ -79,7 +84,7 @@ foreach ($images as $image_file) {
 	//load file into imagick, convert, and save
 	$image = new Imagick($image_file);
 	$image->setImageFormat('jpeg');
-	$image->setImageCompressionQuality(95);
+	$image->setImageCompressionQuality($jpg_quality);
 	$image->writeImage($target_filename);
 	$image->clear();
 
