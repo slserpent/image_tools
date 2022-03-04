@@ -1,0 +1,6 @@
+deletterbox
+.idea
+.gitattributes
+geolocate.php
+image_diff.php
+*.htm
